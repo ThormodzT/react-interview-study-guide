@@ -24,6 +24,59 @@ JSX gets compiled into JavaScript functions like `React.createElement()` before 
 
 ---
 
+### 3. React Rendering Process
+
+React re-renders components **when state or props change**. The rendering process consists of:
+
+1. **Rendering Phase** – React calls the component function.
+2. **Reconciliation** – React compares the new and previous virtual DOM.
+3. **Commit Phase** – React updates the real DOM if necessary.
+
+#### Example: What Triggers Re-renders?
+
+| Action                      | Causes Re-render? |
+| --------------------------- | ----------------- |
+| Changing `useState`         | ✅ Yes            |
+| Changing `useRef`           | ❌ No             |
+| Changing props              | ✅ Yes            |
+| Parent component re-renders | ✅ Yes            |
+| Updating context value      | ✅ Yes            |
+
+### 4. Optimizing React Rendering
+
+#### 1. **Use `useMemo` and `useCallback`**
+
+Prevents unnecessary re-renders by memoizing values and functions.
+
+```javascript
+import { useState, useMemo } from "react";
+
+function ExpensiveCalculation({ num }) {
+  const result = useMemo(() => num * 2, [num]);
+  return <p>Result: {result}</p>;
+}
+```
+
+#### 2. **Use `React.memo` for Component Memoization**
+
+Prevents re-rendering if props haven't changed.
+
+```javascript
+import React from "react";
+const MemoizedComponent = React.memo(({ value }) => <p>{value}</p>);
+```
+
+#### 3. **Avoid Unnecessary State Updates**
+
+Changing state when it's not needed can cause extra renders.
+
+```javascript
+// Avoid re-rendering unnecessarily
+setState((prev) => prev + 1);
+```
+
+---
+
 ## **How to Create a Component?**
 
 ### Functional Component (Recommended)
@@ -54,7 +107,7 @@ class MyComponent extends React.Component {
 | State             | Uses `this.state`                       | Uses `useState()` hook |
 | Lifecycle Methods | Uses methods like `componentDidMount()` | Uses `useEffect()`     |
 | Performance       | Less efficient due to `this` binding    | More optimized         |
-| Recommended?      | ❌ No (except for Error Boundaries)      | ✅ Yes                  |
+| Recommended?      | ❌ No (except for Error Boundaries)     | ✅ Yes                 |
 
 ---
 
@@ -103,13 +156,76 @@ const [count, setCount] = useState(0);
 
 ## **Common React Hooks**
 
-| Hook            | Purpose                         |
-| --------------- | ------------------------------- |
-| `useState()`    | Adds local state                |
-| `useEffect()`   | Runs side effects               |
-| `useContext()`  | Manages global state            |
-| `useMemo()`     | Memoizes expensive computations |
-| `useCallback()` | Memoizes functions              |
+| Hook            | Purpose                                   |
+| --------------- | ----------------------------------------- |
+| `useState()`    | Adds local state                          |
+| `useEffect()`   | Runs side effects                         |
+| `useContext()`  | Manages global state                      |
+| `useMemo()`     | Memoizes expensive computations           |
+| `useCallback()` | Memoizes functions                        |
+| `useRef()`      | Persist values without causing re renders |
+
+---
+
+## Understanding `useRef` in React and React Rendering
+
+### 1. What is `useRef` in React?
+
+`useRef` is a React **hook** that allows you to persist values **without causing re-renders**. It is commonly used for:
+
+- **Accessing DOM elements**
+- **Persisting values between renders**
+- **Storing mutable values without triggering a re-render**
+
+### 2. How `useRef` Works
+
+`useRef` returns a **mutable object** with a `.current` property that persists across renders.
+
+#### Example: Using `useRef` to Access a DOM Element
+
+```javascript
+import { useRef, useEffect } from "react";
+
+function FocusInput() {
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current.focus(); // Automatically focus input field on mount
+  }, []);
+
+  return <input ref={inputRef} placeholder="Type here..." />;
+}
+```
+
+- The `ref` is attached to the `<input>` element.
+- When the component mounts, `useEffect` sets focus on the input.
+
+#### Example: Persisting Values Without Re-Renders
+
+```javascript
+import { useRef, useState } from "react";
+
+function Counter() {
+  const countRef = useRef(0);
+  const [state, setState] = useState(0);
+
+  function increment() {
+    countRef.current += 1;
+    console.log("Ref value:", countRef.current);
+  }
+
+  return (
+    <div>
+      <p>State: {state}</p>
+      <button onClick={() => setState(state + 1)}>Increment State</button>
+      <button onClick={increment}>Increment Ref</button>
+    </div>
+  );
+}
+```
+
+- Clicking **Increment State** causes a re-render.
+- Clicking **Increment Ref** changes `countRef.current` but does **not** trigger a re-render.
 
 ---
 
@@ -118,13 +234,13 @@ const [count, setCount] = useState(0);
 Keys help React identify elements that change. Keys must be unique. ✅ Correct:
 
 ```jsx
-items.map(item => <li key={item.id}>{item.name}</li>)
+items.map((item) => <li key={item.id}>{item.name}</li>);
 ```
 
 ❌ Incorrect:
 
 ```jsx
-items.map((item, index) => <li key={index}>{item.name}</li>)
+items.map((item, index) => <li key={index}>{item.name}</li>);
 ```
 
 ---
@@ -176,7 +292,7 @@ Example:
 ```jsx
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'INCREMENT':
+    case "INCREMENT":
       return { count: state.count + 1 };
     default:
       return state;
@@ -212,4 +328,3 @@ Example:
 ```
 
 ---
-
