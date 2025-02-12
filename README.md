@@ -328,3 +328,52 @@ Example:
 ```
 
 ---
+# How to Create a Custom Hook in React
+
+A **custom hook** in React is a reusable function that uses built-in hooks (`useState`, `useEffect`, etc.) to encapsulate shared logic.
+
+## Steps to Create a Custom Hook
+
+1. **Define a function** that starts with `use`.
+2. **Use other hooks** inside the function.
+3. **Return values or functions** so the component using it can access them.
+
+## Example: `useCounter` (A Custom Hook for a Counter)
+
+We create a hook called `useCounter` that manages a counter with functions to increment and decrement.
+
+```jsx
+import { useState } from 'react';
+
+function useCounter(initialValue = 0) {
+  const [count, setCount] = useState(initialValue);
+
+  const increment = () => setCount(count + 1);
+  const decrement = () => setCount(count - 1);
+  const reset = () => setCount(initialValue);
+
+  return { count, increment, decrement, reset };
+}
+
+export default useCounter;
+decrement.
+
+import React from 'react';
+import useCounter from './useCounter';
+
+function CounterComponent() {
+  const { count, increment, decrement, reset } = useCounter(10);
+
+  return (
+    <div>
+      <h1>Counter: {count}</h1>
+      <button onClick={increment}>Increment</button>
+      <button onClick={decrement}>Decrement</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  );
+}
+
+export default CounterComponent;
+```
+
